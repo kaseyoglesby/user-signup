@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2, re
+import webapp2, re, cgi
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PWD_RE = re.compile(r"^.{3,20}$")
@@ -34,7 +34,10 @@ page_header = """
 <html>
 <head>
     <title>User Signup</title>
-    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -51,21 +54,6 @@ page_footer = """
 class MainHandler(webapp2.RequestHandler):
 
     def get(self):
-        add_form = """
-        <form>
-            <label>Username</label>
-            <input type="text" name="username" class="box" /><br>
-            <label>Password</label>
-            <input type="text" name="password" class="box" /><br>
-            <label>Confirm password</label>
-            <input type="text" name="confirmpassword" class="box" /><br>
-            <label>Email</label>
-            <input type="text" name="email"/><br><br>
-            <input type="submit" value="Submit" class="box" />
-        </form>
-        """
-
-        content = page_header + add_form + page_footer
 
         usernameError = self.request.get("usernameError")
         passwordError = self.request.get("passwordError")
@@ -89,7 +77,31 @@ class MainHandler(webapp2.RequestHandler):
         else:
             confirmPasswordError_element = ''
 
+        usernameBox = """
+            <label>Username</label>
+            <input type="text" name="username" class="box" />
+        """
 
+        passwordBox = """
+            <label>Password</label>
+            <input type="password" name="password" class="box" />
+        """
+
+        confirmPasswordBox = """
+            <label>Confirm password</label>
+            <input type="password" name="confirmpassword" class="box" />
+        """
+
+        emailBox = """
+            <label>Email</label>
+            <input type="text" name="email"/>
+        """
+
+        button = '<br><br><input type="submit" value="Submit" class="box" />'
+
+        add_form = "<form action='/submit' method='post'>" + usernameBox + usernameError_element + "<br>" + passwordBox + passwordError_element + "<br>" + confirmPasswordBox + confirmPasswordError_element + "<br>" + emailBox + button + "</form>"
+
+        content = page_header + add_form + page_footer
 
         self.response.write(content)
 
@@ -105,22 +117,23 @@ class SubmitForm(webapp2.RequestHandler):
         if not valid_username(username):
             usernameError = "Please enter a valid username."
         else:
-            usernameError = "True"
+            usernameError = ""
+
+        if not valid_password(password):
+            passwordError = "Please enter a valid password."
+        else:
+            passwordError = ""
 
         if password == confirmPassword:
-            if not valid_password(password):
-                passwordError = "Please enter a valid password."
-            else:
-                passwordError = "True"
-                confirmPasswordError = "True"
+            confirmPasswordError = ""
         else:
             confirmPasswordError = "Passwords do not match."
 
-        if usernameError != "True" or passwordError  != "True" or confirmPasswordError != "True":
-            errorMessages = "/?usernameError=" + usernameError + "?passwordError=" + passwordError + "?confirmPasswordError=" + confirmPasswordError
+        if usernameError or passwordError or confirmPasswordError:
+            errorMessages = "/?usernameError=" + usernameError + "&passwordError=" + passwordError + "&confirmPasswordError=" + confirmPasswordError
             self.redirect(errorMessages)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/success', SubmitForm)
+    ('/submit', SubmitForm)
 ], debug=True)
