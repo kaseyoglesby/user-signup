@@ -150,7 +150,6 @@ class SubmitForm(webapp2.RequestHandler):
         if errors:
             self.redirect(queries)
         else:
-            # self.response.write("<h1>Thanks for logging in, " + username + "!</h1>")
             self.redirect('/success?username=' + username)
 
 class Success(webapp2.RequestHandler):
