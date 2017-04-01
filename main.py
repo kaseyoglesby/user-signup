@@ -55,12 +55,8 @@ class MainHandler(webapp2.RequestHandler):
 
     def get(self):
 
-        # username = ""
         username = self.request.get("username")
-
-        # email = ""
         email = self.request.get("email")
-
         usernameError = self.request.get("usernameError")
         passwordError = self.request.get("passwordError")
         confirmPasswordError = self.request.get("confirmPasswordError")
@@ -127,40 +123,46 @@ class SubmitForm(webapp2.RequestHandler):
         password = self.request.get("password")
         confirmPassword = self.request.get("confirmpassword")
         email = self.request.get("email")
-        errorMessages = ""
+        queries = "/?username=" + username + "&email=" + email
+        errors = False
 
         if not valid_username(username):
             usernameError = "Please enter a valid username."
-        else:
-            usernameError = ""
+            queries += "&usernameError=" + usernameError
+            errors = True
 
         if not valid_password(password):
             passwordError = "Please enter a valid password."
-        else:
-            passwordError = ""
+            queries += "&passwordError=" + passwordError
+            errors = True
 
         if password != confirmPassword:
             confirmPasswordError = "Passwords do not match."
-        else:
-            confirmPasswordError = ""
+            queries += "&confirmPasswordError=" + confirmPasswordError
+            errors = True
 
         if email and not valid_email(email):
             emailError = "Email address is not valid."
-        else:
-            emailError = ""
+            queries += "&emailError=" + emailError
+            errors = True
 
-        if usernameError or passwordError or confirmPasswordError or emailError:
-            queries = ("/?username=" + username +
-                       "&email=" + email +
-                       "&usernameError=" + usernameError +
-                       "&passwordError=" + passwordError +
-                       "&confirmPasswordError=" + confirmPasswordError +
-                       "&emailError=" + emailError)
+        if errors:
             self.redirect(queries)
         else:
+            # self.response.write("<h1>Thanks for logging in, " + username + "!</h1>")
+            self.redirect('/success?username=' + username)
+
+class Success(webapp2.RequestHandler):
+
+    def get(self):
+        username = self.request.get("username")
+        if valid_username(username):
             self.response.write("<h1>Thanks for logging in, " + username + "!</h1>")
+        else:
+            self.redirect("/")
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/submit', SubmitForm)
+    ('/submit', SubmitForm),
+    ('/success', Success)
 ], debug=True)
