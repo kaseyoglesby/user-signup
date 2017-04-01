@@ -1,0 +1,13 @@
+.error {
+    color: red;
+}
+
+.label {
+    text-align: right;
+}
+
+.button {
+    float: right;
+    vertical-align: bottom;
+    height: 100px;
+}

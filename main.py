@@ -34,11 +34,7 @@ page_header = """
 <html>
 <head>
     <title>User Signup</title>
-    <style type="text/css">
-        .error {
-            color: red;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css" />
 </head>
 <body>
     <h1>
@@ -63,54 +59,59 @@ class MainHandler(webapp2.RequestHandler):
         emailError = self.request.get("emailError")
 
         if usernameError:
-            usernameError_element = '<span class="error">' + cgi.escape(usernameError, quote=True) + '</span>'
+            usernameError_element = '<td class="error">' + cgi.escape(usernameError, quote=True) + '</td>'
         else:
             usernameError_element = ''
 
         if passwordError:
-            passwordError_element = '<span class="error">' + cgi.escape(passwordError, quote=True) + '</span>'
+            passwordError_element = '<td class="error">' + cgi.escape(passwordError, quote=True) + '</td>'
         else:
             passwordError_element = ''
 
         if confirmPasswordError:
-            confirmPasswordError_element = '<span class="error">' + cgi.escape(confirmPasswordError, quote=True) + '</span>'
+            confirmPasswordError_element = '<td class="error">' + cgi.escape(confirmPasswordError, quote=True) + '</td>'
         else:
             confirmPasswordError_element = ''
 
         if emailError:
-            emailError_element = '<span class="error">' + cgi.escape(emailError, quote=True) + '</span>'
+            emailError_element = '<td class="error">' + cgi.escape(emailError, quote=True) + '</td>'
         else:
             emailError_element = ''
 
         usernameBox = """
-            <label>Username</label>
-            <input type="text" name="username" value="{0}" class="box" />
-        """.format(username)
-        usernameEntry = usernameBox + usernameError_element + "<br>"
+                    <td class="label">Username</td>
+                    <td><input type="text" name="username" value="{0}" /><td>
+                    """.format(username)
+        usernameEntry = "<tr>" + usernameBox + usernameError_element + "</tr>"
 
         passwordBox = """
-            <label>Password</label>
-            <input type="password" name="password" class="box" />
-        """
-        passwordEntry = passwordBox + passwordError_element + "<br>"
+                    <td class="label">Password</td>
+                    <td><input type="password" name="password" /></td>
+                    """
+        passwordEntry = "<tr>" + passwordBox + passwordError_element + "</tr>"
 
         confirmPasswordBox = """
-            <label>Confirm password</label>
-            <input type="password" name="confirmpassword" class="box" />
-        """
-        confirmPasswordEntry = confirmPasswordBox + confirmPasswordError_element + "<br>"
+                    <td class="label">Confirm password</td>
+                    <td><input type="password" name="confirmpassword" /></td>
+                    """
+        confirmPasswordEntry = "<tr>" + confirmPasswordBox + confirmPasswordError_element + "</tr>"
 
         emailBox = """
-            <label>Email (optional)</label>
-            <input type="text" name="email" value="{0}"/>
-        """.format(email)
-        emailEntry = emailBox + emailError_element + "<br><br>"
+                    <td class="label">Email (optional)</td>
+                    <td><input type="text" name="email" value="{0}" /></td>
+                    """.format(email)
+        emailEntry = "<tr>" + emailBox + emailError_element + "</tr>"
 
-        button = "<input type='submit' value='Submit' class='box' />"
+        button = """
+                    <tr>
+                    <td></td>
+                    <td class="button"><input type="submit" value="Submit" /></td>
+                    </tr>
+                    """
 
-        add_form = ("<form action='/submit' method='post'>" +
+        add_form = ("<form action='/submit' method='post'><table>" +
                     usernameEntry + passwordEntry + confirmPasswordEntry + emailEntry + button +
-                    "</form>")
+                    "</table></form>")
 
         content = page_header + add_form + page_footer
 
@@ -157,7 +158,7 @@ class Success(webapp2.RequestHandler):
     def get(self):
         username = self.request.get("username")
         if valid_username(username):
-            self.response.write("<h1>Thanks for logging in, " + username + "!</h1>")
+            self.response.write("<h1>Thanks for logging in, {0}!</h1>".format(username))
         else:
             self.redirect("/")
 
