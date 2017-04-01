@@ -24,10 +24,10 @@ def valid_username(username):
     return USER_RE.match(username)
 
 def valid_password(password):
-    return USER_RE.match(password)
+    return PWD_RE.match(password)
 
 def valid_email(email):
-    return USER_RE.match(email)
+    return EMAIL_RE.match(email)
 
 page_header = """
 <!DOCTYPE html>
@@ -58,48 +58,57 @@ class MainHandler(webapp2.RequestHandler):
         usernameError = self.request.get("usernameError")
         passwordError = self.request.get("passwordError")
         confirmPasswordError = self.request.get("confirmPasswordError")
+        emailError = self.request.get("emailError")
 
         if usernameError:
-            usernameError_esc = cgi.escape(usernameError, quote=True)
-            usernameError_element = '<span class="error">' + usernameError_esc + '</span>'
+            usernameError_element = '<span class="error">' + cgi.escape(usernameError, quote=True) + '</span>'
         else:
             usernameError_element = ''
 
         if passwordError:
-            passwordError_esc = cgi.escape(passwordError, quote=True)
-            passwordError_element = '<span class="error">' + passwordError_esc + '</span>'
+            passwordError_element = '<span class="error">' + cgi.escape(passwordError, quote=True) + '</span>'
         else:
             passwordError_element = ''
 
         if confirmPasswordError:
-            confirmPasswordError_esc = cgi.escape(confirmPasswordError, quote=True)
-            confirmPasswordError_element = '<span class="error">' + confirmPasswordError_esc + '</span>'
+            confirmPasswordError_element = '<span class="error">' + cgi.escape(confirmPasswordError, quote=True) + '</span>'
         else:
             confirmPasswordError_element = ''
+
+        if emailError:
+            emailError_element = '<span class="error">' + cgi.escape(emailError, quote=True) + '</span>'
+        else:
+            emailError_element = ''
 
         usernameBox = """
             <label>Username</label>
             <input type="text" name="username" class="box" />
         """
+        usernameEntry = usernameBox + usernameError_element + "<br>"
 
         passwordBox = """
             <label>Password</label>
             <input type="password" name="password" class="box" />
         """
+        passwordEntry = passwordBox + passwordError_element + "<br>"
 
         confirmPasswordBox = """
             <label>Confirm password</label>
             <input type="password" name="confirmpassword" class="box" />
         """
+        confirmPasswordEntry = confirmPasswordBox + confirmPasswordError_element + "<br>"
 
         emailBox = """
-            <label>Email</label>
+            <label>Email (optional)</label>
             <input type="text" name="email"/>
         """
+        emailEntry = emailBox + emailError_element + "<br><br>"
 
-        button = '<br><br><input type="submit" value="Submit" class="box" />'
+        button = "<input type='submit' value='Submit' class='box' />"
 
-        add_form = "<form action='/submit' method='post'>" + usernameBox + usernameError_element + "<br>" + passwordBox + passwordError_element + "<br>" + confirmPasswordBox + confirmPasswordError_element + "<br>" + emailBox + button + "</form>"
+        add_form = ("<form action='/submit' method='post'>" +
+                    usernameEntry + passwordEntry + confirmPasswordEntry + emailEntry + button +
+                    "</form>")
 
         content = page_header + add_form + page_footer
 
@@ -124,14 +133,24 @@ class SubmitForm(webapp2.RequestHandler):
         else:
             passwordError = ""
 
-        if password == confirmPassword:
-            confirmPasswordError = ""
-        else:
+        if password != confirmPassword:
             confirmPasswordError = "Passwords do not match."
+        else:
+            confirmPasswordError = ""
 
-        if usernameError or passwordError or confirmPasswordError:
-            errorMessages = "/?usernameError=" + usernameError + "&passwordError=" + passwordError + "&confirmPasswordError=" + confirmPasswordError
+        if email and not valid_email(email):
+            emailError = "Email address is not valid."
+        else:
+            emailError = ""
+
+        if usernameError or passwordError or confirmPasswordError or emailError:
+            errorMessages = ("/?usernameError=" + usernameError +
+                             "&passwordError=" + passwordError +
+                             "&confirmPasswordError=" + confirmPasswordError +
+                             "&emailError=" + emailError)
             self.redirect(errorMessages)
+        else:
+            self.response.write("<h1>Thanks for logging in, " + username + "!</h1>")
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
