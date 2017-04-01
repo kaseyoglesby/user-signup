@@ -55,6 +55,12 @@ class MainHandler(webapp2.RequestHandler):
 
     def get(self):
 
+        # username = ""
+        username = self.request.get("username")
+
+        # email = ""
+        email = self.request.get("email")
+
         usernameError = self.request.get("usernameError")
         passwordError = self.request.get("passwordError")
         confirmPasswordError = self.request.get("confirmPasswordError")
@@ -82,8 +88,8 @@ class MainHandler(webapp2.RequestHandler):
 
         usernameBox = """
             <label>Username</label>
-            <input type="text" name="username" class="box" />
-        """
+            <input type="text" name="username" value="{0}" class="box" />
+        """.format(username)
         usernameEntry = usernameBox + usernameError_element + "<br>"
 
         passwordBox = """
@@ -100,8 +106,8 @@ class MainHandler(webapp2.RequestHandler):
 
         emailBox = """
             <label>Email (optional)</label>
-            <input type="text" name="email"/>
-        """
+            <input type="text" name="email" value="{0}"/>
+        """.format(email)
         emailEntry = emailBox + emailError_element + "<br><br>"
 
         button = "<input type='submit' value='Submit' class='box' />"
@@ -144,11 +150,13 @@ class SubmitForm(webapp2.RequestHandler):
             emailError = ""
 
         if usernameError or passwordError or confirmPasswordError or emailError:
-            errorMessages = ("/?usernameError=" + usernameError +
-                             "&passwordError=" + passwordError +
-                             "&confirmPasswordError=" + confirmPasswordError +
-                             "&emailError=" + emailError)
-            self.redirect(errorMessages)
+            queries = ("/?username=" + username +
+                       "&email=" + email +
+                       "&usernameError=" + usernameError +
+                       "&passwordError=" + passwordError +
+                       "&confirmPasswordError=" + confirmPasswordError +
+                       "&emailError=" + emailError)
+            self.redirect(queries)
         else:
             self.response.write("<h1>Thanks for logging in, " + username + "!</h1>")
 
